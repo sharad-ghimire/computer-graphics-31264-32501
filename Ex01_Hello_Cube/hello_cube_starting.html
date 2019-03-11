@@ -2,7 +2,7 @@
   <head>
     <title>Simple Geometry Test</title>
   </head>
-
+  <script src="js/three.js"></script>
   <style>
     body {
       margin: 0;
@@ -15,11 +15,30 @@
 
   <body>
     <!--include the three.js library-->
-    <script src="js/three.js">
+    <script>
+      var width = window.innerWidth;
+      var height = window.innerHeight;
       var scene = new THREE.Scene();
-      // Define a perpective camera
       var camera = new THREE.PerspectiveCamera(45, width / height, 1, 1000);
-              scene.add(camera);
+      camera.position.set(0, 0, 4);
+      camera.lookAt(0, 0, 1);
+
+      var renderer = new THREE.WebGLRenderer();
+      renderer.setSize(width, height);
+      document.body.appendChild(renderer.domElement);
+
+      // Mesh is the data struture to reprensent propertires of 3D models
+      var cubeGeometry = new THREE.BoxGeometry(2, 2, 2);
+      var cubeMaterial = new THREE.MeshBasicMaterial();
+      cubeMaterial.color = new THREE.Color(0, 1, 0);
+      cubeMaterial.wireframe = true;
+      var cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+
+      scene.add(cube);
+
+      cube.position.x += 2;
+
+      renderer.render(scene, camera);
     </script>
     <style>
       body {
@@ -40,6 +59,5 @@
     <div id="info">
       <p>This is the first example using threeJS</p>
     </div>
-    <script></script>
   </body>
 </html>
