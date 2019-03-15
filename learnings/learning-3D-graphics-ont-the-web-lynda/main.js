@@ -17,23 +17,29 @@ const init = () => {
 
   camera.lookAt(new THREE.Vector3(0, 0, 0));
 
-  const box = getBox(1, 1, 1, 'rgb(120, 120, 120)');
-  const plane = getPlane(20, 'rgb(120, 120, 120)');
+  // const box = getBox(1, 1, 1, 'rgb(120, 120, 120)');
+  const plane = getPlane(30, 'rgb(120, 120, 120)');
   const sphere = getSphere(0.05, 'rgb(255, 255, 255)');
-  const pointLight = getPointLight(1);
+  const spotLight = getSpotLight(1);
+  const boxGrid = getBoxGrid(10, 1.5);
 
-  box.position.y = box.geometry.parameters.height / 2;
+  // box.position.y = box.geometry.parameters.height / 2;
   plane.rotation.x = Math.PI / 2;
-  pointLight.position.y = 1.25;
-  pointLight.intensity = 2;
+  spotLight.position.y = 1.25;
+  spotLight.intensity = 2;
 
   // dat.GUI() controllers
-  gui.add(pointLight, 'intensity', 0, 10);
-  gui.add(pointLight.position, 'y', 0, 5);
+  gui.add(spotLight, 'intensity', 0, 10);
+  gui.add(spotLight.position, 'y', 0, 20);
+  gui.add(spotLight.position, 'x', 0, 20);
+  gui.add(spotLight.position, 'z', 0, 20);
+  gui.add(spotLight, 'penumbra', 0, 1);
 
-  pointLight.add(sphere);
-  scene.add(pointLight);
-  scene.add(box);
+  spotLight.add(sphere);
+  scene.add(spotLight);
+  scene.add(boxGrid);
+
+  // scene.add(box);
 
   scene.add(plane);
 
@@ -77,6 +83,36 @@ const getPointLight = (intensity) => {
   let light = new THREE.PointLight(0xffffff, intensity);
   light.castShadow = true;
   return light;
+};
+
+const getSpotLight = (intensity) => {
+  let light = new THREE.SpotLight(0xffffff, intensity);
+  light.castShadow = true;
+  light.shadow.bias = 0.001;
+  return light;
+};
+
+const getBoxGrid = (amount, separationMultiplier) => {
+  let group = new THREE.Group();
+
+  for (let i = 0; i < amount; i++) {
+    let object = getBox(1, 1, 1, 'rgb(120, 120, 120)');
+    object.position.x = i * separationMultiplier;
+    object.position.y = object.geometry.parameters.height / 2;
+    group.add(object);
+    for (let j = 1; j < amount; j++) {
+      let object = getBox(1, 1, 1, 'rgb(120, 120, 120)');
+      object.position.x = i * separationMultiplier;
+      object.position.y = object.geometry.parameters.height / 2;
+      object.position.z = j * separationMultiplier;
+
+      group.add(object);
+    }
+  }
+
+  group.position.x = -(separationMultiplier * (amount - 1)) / 2;
+  group.position.z = -(separationMultiplier * (amount - 1)) / 2;
+  return group;
 };
 
 const update = (renderer, scene, camera, controls) => {

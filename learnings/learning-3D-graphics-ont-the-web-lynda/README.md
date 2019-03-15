@@ -294,7 +294,7 @@ const update = (renderer, scene, camera, controls) => {
 
 ### Shadows
 
-Shadows are the crucial element of lighting, although it not straight forward in Three.js because shadows are conditionally expensive and we need to active shadow rendering on multiple places.
+Shadows are the crucial element of lighting, although it not straight forward in Three.js because shadows are conditionally expensive and we need to active shadow rendering on multiple places. Shadows in three.js are generated using a technique called shadow maps, which is a performance-optimized way of calculating shadows, but can sometimes yield glitchy results.
 
 ```js
 // first we need to tell  the renderer to start rendering shadows
@@ -307,7 +307,7 @@ const getPointLight = (intensity) => {
 };
 
 // We should also tell objects to cast or recieve shadows
-// lets make box to cast shadow and plane to recive shadow
+// lets make box to cast shadow
 const getBox = (width, height, depth, color) => {
   const mesh = new THREE.Mesh(
     new THREE.BoxGeometry(width, height, depth),
@@ -316,7 +316,7 @@ const getBox = (width, height, depth, color) => {
   mesh.castShadow = true;
   return mesh;
 };
-
+// and plane to recieve shadow
 const getPlane = (size, color) => {
   let mesh = new THREE.Mesh(
     new THREE.PlaneGeometry(size, size),
@@ -326,3 +326,62 @@ const getPlane = (size, color) => {
   return mesh;
 };
 ```
+
+### Programmatically creating more boxes
+
+```js
+const getBoxGrid = (amount, separationMultiplier) => {
+  let group = new THREE.Group(); // A Group is a non-geometric object used for organizing other objects together (like html <div>). It serves the purpose of containing other object
+
+  for (let i = 0; i < amount; i++) {
+    let object = getBox(1, 1, 1, 'rgb(120, 120, 120)');
+    object.position.x = i * separationMultiplier;
+    object.position.y = object.geometry.parameters.height / 2;
+    group.add(object);
+    for (let j = 1; j < amount; j++) {
+      let object = getBox(1, 1, 1, 'rgb(120, 120, 120)');
+      object.position.x = i * separationMultiplier;
+      object.position.y = object.geometry.parameters.height / 2;
+      object.position.z = j * separationMultiplier;
+      group.add(object);
+    }
+  }
+
+  group.position.x = -(separationMultiplier * (amount - 1)) / 2;
+  group.position.z = -(separationMultiplier * (amount - 1)) / 2;
+  return group;
+};
+
+// inside init()
+const boxGrid = getBoxGrid(10, 1.5);
+scene.add(boxGrid);
+```
+
+### Types of light
+
+- **SpotLight** : The SpotLight is somewhat similar to PointLighting, but its influence is limited to a cone that gets projected from the light. The border where the light meets the shadow might look too sharp which can be controlled by setting the `penumbra` parameter.
+
+```js
+const getSpotLight = (intensity) => {
+  let light = new THREE.SpotLight(0xffffff, intensity);
+  light.castShadow = true;
+  light.shadow.bias = 0.001; //fix for common shadowmap problem in artifacts
+  return light;
+};
+// init() same as pointLighht
+const spotLight = getSpotLight(1);
+spotLight.position.y = 1.25;
+spotLight.intensity = 2;
+// dat.GUI() controllers
+gui.add(spotLight, 'intensity', 0, 10);
+gui.add(spotLight.position, 'y', 0, 20);
+gui.add(spotLight.position, 'x', 0, 20);
+gui.add(spotLight.position, 'z', 0, 20);
+gui.add(spotLight, 'penumbra', 0, 1);
+
+spotLight.add(sphere);
+```
+
+- DirectionalLight
+- AmbientLight
+- RectAreaLight
