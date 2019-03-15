@@ -38,6 +38,7 @@ const init = () => {
   scene.add(plane);
 
   const renderer = new THREE.WebGLRenderer();
+  renderer.shadowMap.enabled = true;
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.setClearColor('rgb(120, 120, 120)');
   document.getElementById('webgl').append(renderer.domElement);
@@ -48,24 +49,35 @@ const init = () => {
   return scene;
 };
 
-const getBox = (width, height, depth, color) =>
-  new THREE.Mesh(
+const getBox = (width, height, depth, color) => {
+  let mesh = new THREE.Mesh(
     new THREE.BoxGeometry(width, height, depth),
     new THREE.MeshPhongMaterial({ color })
   );
+  mesh.castShadow = true;
+  return mesh;
+};
 
-const getPlane = (size, color) =>
-  new THREE.Mesh(
+const getPlane = (size, color) => {
+  let mesh = new THREE.Mesh(
     new THREE.PlaneGeometry(size, size),
     new THREE.MeshPhongMaterial({ color, side: THREE.DoubleSide })
   );
+  mesh.receiveShadow = true;
+  return mesh;
+};
+
 const getSphere = (radius, color) =>
   new THREE.Mesh(
     new THREE.SphereGeometry(radius, 24, 24),
     new THREE.MeshBasicMaterial({ color })
   );
 
-const getPointLight = (intensity) => new THREE.PointLight(0xffffff, intensity);
+const getPointLight = (intensity) => {
+  let light = new THREE.PointLight(0xffffff, intensity);
+  light.castShadow = true;
+  return light;
+};
 
 const update = (renderer, scene, camera, controls) => {
   renderer.render(scene, camera);

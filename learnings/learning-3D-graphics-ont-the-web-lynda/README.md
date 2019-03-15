@@ -291,3 +291,38 @@ const update = (renderer, scene, camera, controls) => {
   });
 };
 ```
+
+### Shadows
+
+Shadows are the crucial element of lighting, although it not straight forward in Three.js because shadows are conditionally expensive and we need to active shadow rendering on multiple places.
+
+```js
+// first we need to tell  the renderer to start rendering shadows
+renderer.shadowMap.enabled = true;
+// Then we need to tell lighhts to cast the shadows
+const getPointLight = (intensity) => {
+  let light = new THREE.PointLight(0xffffff, intensity);
+  light.castShadow = true;
+  return light;
+};
+
+// We should also tell objects to cast or recieve shadows
+// lets make box to cast shadow and plane to recive shadow
+const getBox = (width, height, depth, color) => {
+  const mesh = new THREE.Mesh(
+    new THREE.BoxGeometry(width, height, depth),
+    new THREE.MeshPhongMaterial({ color })
+  );
+  mesh.castShadow = true;
+  return mesh;
+};
+
+const getPlane = (size, color) => {
+  let mesh = new THREE.Mesh(
+    new THREE.PlaneGeometry(size, size),
+    new THREE.MeshPhongMaterial({ color, side: THREE.DoubleSide })
+  );
+  mesh.receiveShadow = true;
+  return mesh;
+};
+```
