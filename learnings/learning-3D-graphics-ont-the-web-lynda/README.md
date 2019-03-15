@@ -203,3 +203,91 @@ scene.fog = new THREE.FogExp2(0xffffff, 0.2);
 ```
 
 ### Lights
+
+Till now, we are using `MeshBasicMaterial()` on our object which is not affected by the scene lighting. Some of the material to choose in Three.js for example: `MeshPhongMetarial`.
+
+```js
+const getBox = (width, height, depth, color) =>
+  new THREE.Mesh(
+    new THREE.BoxGeometry(width, height, depth),
+    new THREE.MeshPhongMaterial({ color })
+  );
+```
+
+Now, we have objects that are affected by lightings. But we are not seeing anything because there is no lights. Let's create one. Types of light
+
+- **PointLight**: is emmitted from a single point in space, in all direction. Like a bulb.
+
+```js
+// Will get an intensity
+// A point light takes two arguments, 1 is color of the light and 2 intensity
+const getPointLight = (intensity) => {
+  let light = new THREE.PointLight(0xffffff, intensity);
+  return light;
+};
+
+// inside init()
+const pointLight = getPointLight(1);
+pointLight.position.y = 2; //  because initialy any object will be place at 0
+scene.add(pointLight);
+```
+
+As we cannot precisely see the positon of light, we can use some tricks. Like create a simple sphere object and add it to light object. (parent child relationship)
+
+```js
+const getSphere = (radius, color) =>
+  new THREE.Mesh(
+    new THREE.SphereGeometry(radius, 24, 24), // those 24 are segement values (resolution of geometry) It tells how smooth the curved object going to look
+    new THREE.MeshBasicMaterial({ color })
+  );
+
+// Inside init()
+
+const sphere = getSphere(0.05, 'rgb(255, 255, 255)');
+pointLight.add(sphere); // child of pointLight
+```
+
+**dat.GUI** : Is a JavaScript library to easily create user interfaces that control variables. It works well with three.js as it provides a way to alter the scene values in real time.
+
+```html
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.5/dat.gui.min.js"></script>
+```
+
+To use it, just instantiate and use `add()` to add the parameters that we would like to control, through a user interface.
+
+```js
+const gui = new dat.GUI();
+//...0, 10 is the range of argument intensity
+gui.add(pointLight, 'intensity', 0, 10);
+gui.add(pointLight.position, 'y', 0, 5);
+```
+
+Now, we can see new slider being created and allows us to interact with it.
+
+**Orbit Control**: Another interactivity is orbit control for camera. It allows us to rotate the camera around the scene by just dragging our mouse on the screen. It will let us see what's going on much better by allowing for interactive camera movement. [Download that script]("https://github.com/mrdoob/three.js/blob/dev/examples/js/controls/OrbitControls.js"). Which is same as below:
+
+```html
+<script src="OrbitControl.js"></script>
+```
+
+_Instantiating orbit controls_
+
+```js
+// Instantiating with camera and renderer.domElement
+const controls = new THREE.OrbitControls(camera, renderer.domElement);
+
+//pass that control to update() becoz we want to update it with each requestAnimationFrame call (on each frame render)
+update(renderer, scene, camera, controls);
+
+//...
+const update = (renderer, scene, camera, controls) => {
+  renderer.render(scene, camera);
+
+  // call update() on controls object to active it
+  controls.update();
+
+  requestAnimationFrame(() => {
+    update(renderer, scene, camera, controls);
+  });
+};
+```
