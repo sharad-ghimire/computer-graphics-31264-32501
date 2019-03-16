@@ -9,23 +9,25 @@ const init = () => {
 
   camera.position.z = 10;
   renderer = new THREE.WebGLRenderer({ antialias: true });
-  renderer.setClearColor("#e5e5e5");
+  renderer.setClearColor('#e5e5e5');
   renderer.setSize(width, height);
 
-  document.getElementById("webgl").append(renderer.domElement);
-  const sphere = getSphere(2, 20, 20, 0xffcc00);
+  document.getElementById('webgl').append(renderer.domElement);
+  const sphere = getSphere(2, 10, 10, 0xffcc00);
   const pointLight = getPointLight(0xffffff, 1, 500);
   scene.add(sphere);
   scene.add(pointLight);
   pointLight.position.set(10, 0, 25);
-  console.log(scene);
-  window.addEventListener("resize", () => {
+
+  window.addEventListener('resize', () => {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
   });
+
   const render = () => {
     requestAnimationFrame(render);
+    sphere.rotation.x += 0.1;
     renderer.render(scene, camera);
   };
   render();
