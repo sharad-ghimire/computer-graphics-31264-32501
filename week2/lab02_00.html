@@ -1,0 +1,189 @@
+<!-- moving_camera_manual_start_code -->
+
+<html>
+  <head>
+    <title>Simple Geometry Test</title>
+  </head>
+
+  <style>
+    body {
+      margin: 0;
+    }
+
+    canvas {
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+
+  <body>
+    <!--include the three.js library-->
+    <script src="js/lib/three.js"></script>
+
+    <style>
+      body {
+        font-family: Monospace;
+        background-color: #000;
+        color: #fff;
+        margin: 0px;
+        overflow: hidden;
+      }
+
+      #info {
+        position: absolute;
+        top: 10px;
+        width: 100%;
+        text-align: center;
+      }
+    </style>
+
+    <div id="info">
+      <p>This is a threeJS Test<br /></p>
+    </div>
+
+    <script>
+      //create the scene
+      var scene = new THREE.Scene();
+
+      //create the webgl renderer
+      var renderer = new THREE.WebGLRenderer();
+
+      renderer.setSize(window.innerWidth, window.innerHeight);
+
+      //add the renderer to the current document
+      document.body.appendChild(renderer.domElement);
+
+      var ratio = window.innerWidth / window.innerHeight;
+
+      //create the perspective camera
+      //for parameters see https://threejs.org/docs/#api/cameras/PerspectiveCamera
+      var camera = new THREE.PerspectiveCamera(45, ratio, 0.00001, 1000);
+      var Pos = new THREE.Vector3(0, 0, 0);
+      camera.position.set(Pos.x, Pos.y, Pos.z);
+      var Dir = new THREE.Vector3(0, 0, 1);
+      camera.lookAt(Dir.x, Dir.y, Dir.z);
+
+      var material_box = new THREE.MeshBasicMaterial();
+      material_box.color = new THREE.Color(1, 0, 0);
+      material_box.wireframe = true;
+      var geometry_box = new THREE.BoxGeometry(10, 0.1, 10, 32, 1, 32);
+
+      var BoxMesh = new THREE.Mesh(geometry_box, material_box);
+      BoxMesh.position.y = -1;
+      scene.add(BoxMesh);
+
+      //this function is called when the window is resized
+      var MyResize = function() {
+        //get the new sizes
+        var width = window.innerWidth;
+        var height = window.innerHeight;
+        //then update the renderer
+        renderer.setSize(width, height);
+        //and update the aspect ratio of the camera
+        camera.aspect = width / height;
+
+        //update the projection matrix given the new values
+        camera.updateProjectionMatrix();
+
+        //and finally render the scene again
+        renderer.render(scene, camera);
+      };
+
+      var moveForward = false;
+      var moveBackward = false;
+      var rotateLeft = false;
+      var rotateRight = false;
+
+      var MyKeyDown = function(event) {
+        // event contain informattion about key clicked
+        switch (event.keyCode) {
+          case 38: // up
+          case 87: // w
+            moveForward = true;
+            break;
+
+          case 37: // left
+          case 65: // a
+            rotateLeft = true;
+            break;
+
+          case 40: // down
+          case 83: // s
+            moveBackward = true;
+            break;
+
+          case 39: // right
+          case 68: // d
+            rotateRight = true;
+            break;
+        }
+      };
+
+      let clock = new THREE.Clock(); // measure time
+      let speed = 2;
+      let angle = 0;
+      var MyKeyUp = function(event) {
+        switch (event.keyCode) {
+          case 38: // up
+          case 87: // w
+            moveForward = false;
+            break;
+
+          case 37: // left
+          case 65: // a
+            rotateLeft = false;
+            break;
+
+          case 40: // down
+          case 83: // s
+            moveBackward = false;
+            break;
+
+          case 39: // right
+          case 68: // d
+            rotateRight = false;
+            break;
+        }
+      };
+      var MyUpdateLoop = function() {
+        let delta = clock.getDelta();
+
+        if (moveForward) {
+          Pos.x += Dir.x * speed * delta;
+          Pos.z += Dir.z * speed * delta;
+        }
+
+        if (moveBackward) {
+          Pos.x -= Dir.x * speed * delta;
+          Pos.z -= Dir.z * speed * delta;
+        }
+        if (rotateLeft) {
+          angle += speed * delta;
+          Dir.x = Math.sin(angle);
+          Dir.z = Math.cos(angle);
+          Dir.normalize();
+        }
+        if (rotateRight) {
+          angle -= speed * delta;
+          Dir.x = Math.sin(angle);
+          Dir.z = Math.cos(angle);
+          Dir.normalize();
+        }
+        camera.position.set(Pos.x, Pos.y, Pos.z);
+        camera.lookAt(Pos.x + Dir.x, Pos.y + Dir.y, Pos.z + Dir.z);
+        camera.updateProjectionMatrix();
+
+        renderer.render(scene, camera);
+        requestAnimationFrame(MyUpdateLoop);
+      };
+      requestAnimationFrame(MyUpdateLoop);
+
+      renderer.render(scene, camera);
+
+      //link the resize of the window to the update of the camera
+      window.addEventListener('resize', MyResize);
+      window.addEventListener('keydown', MyKeyDown);
+      window.addEventListener('keyup', MyKeyUp);
+    </script>
+  </body>
+</html>
