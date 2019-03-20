@@ -5,14 +5,14 @@ const ratio = width / height;
 
 const init = () => {
   scene = new THREE.Scene();
-  gui = new dat.GUI();
+  // gui = new dat.GUI();
   camera = new THREE.PerspectiveCamera(70, ratio, 1, 2000);
   controls = new THREE.OrbitControls(camera);
-  axis = new THREE.AxisHelper(300);
+  // axis = new THREE.AxisHelper(300);
   camera.position.z = 200;
 
   // dat.GUI()
-  gui.add(camera.position, 'z', 0, 800);
+  // gui.add(camera.position, 'z', 0, 800);
 
   renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setClearColor('#e5e5e5');
@@ -35,14 +35,14 @@ const init = () => {
   });
 
   const animate = () => {
-    sphere.position.y = 100 * Math.abs(Math.cos(Date.now() * 0.01));
+    sphere.position.y += 0.1;
   };
 
   const render = () => {
     requestAnimationFrame(render);
     controls.update();
     animate();
-    gui.open();
+    // gui.open();
     renderer.render(scene, camera);
   };
   render();
