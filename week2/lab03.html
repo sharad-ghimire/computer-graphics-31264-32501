@@ -1,0 +1,178 @@
+<!-- creating_moebius_starting_code -->
+<html>
+  <head>
+    <title>Moebius Strip</title>
+  </head>
+
+  <style>
+    body {
+      margin: 0;
+    }
+
+    canvas {
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+
+  <body>
+    <!--include the three.js library-->
+    <script src="js/lib/three.js"></script>
+    <!--and the trackball code-->
+    <script src="js/lib/OrbitControls.js"></script>
+
+    <style>
+      body {
+        font-family: Monospace;
+        background-color: #000;
+        color: #fff;
+        margin: 0px;
+        overflow: hidden;
+      }
+
+      #info {
+        position: absolute;
+        top: 10px;
+        width: 100%;
+        text-align: center;
+      }
+    </style>
+
+    <div id="info">
+      <p>
+        Moebius Strip
+        <br />
+      </p>
+    </div>
+    <script>
+      //create the scene
+      var scene = new THREE.Scene();
+      var ratio = window.innerWidth / window.innerHeight;
+      //create the perspective camera
+      //for parameters see https://threejs.org/docs/#api/cameras/PerspectiveCamera
+      var camera = new THREE.PerspectiveCamera(45, ratio, 0.1, 1000);
+
+      //set the camera position
+      camera.position.set(0, 0, 15);
+      // and the direction
+      camera.lookAt(0, 0, 1);
+
+      //create the webgl renderer
+      var renderer = new THREE.WebGLRenderer();
+
+      //set the size of the rendering window
+      renderer.setSize(window.innerWidth, window.innerHeight);
+
+      //add the renderer to the current document
+      document.body.appendChild(renderer.domElement);
+
+      //create the material of the cube (basic material)
+      var material_cube = new THREE.MeshBasicMaterial();
+      //set the color of the cube
+      material_cube.color = new THREE.Color(0, 1, 0);
+      //then set the renderer to wireframe
+      material_cube.wireframe = true;
+      //create the mesh of a cube
+      var geometry_cube = new THREE.BoxGeometry(1, 1, 1);
+
+      controls = new THREE.OrbitControls(camera, renderer.domElement);
+
+      let n = 36; // I want 36 tiles
+      let cubes = [];
+      let reverse = false;
+
+      //final update loop
+      var MyUpdateLoop = function() {
+        clearScene();
+        if (!reverse) currentFrame = (currentFrame + 1) % subFrames;
+        else currentFrame = (currentFrame + subFrames - 1) % subFrames;
+        createScene();
+
+        //call the render with the scene and the camera
+        renderer.render(scene, camera);
+
+        controls.update();
+        //finally perform a recoursive call to update again
+        //this must be called because the mouse change the camera position
+        requestAnimationFrame(MyUpdateLoop);
+      };
+
+      requestAnimationFrame(MyUpdateLoop);
+
+      //this fucntion is called when the window is resized
+      var MyResize = function() {
+        var width = window.innerWidth;
+        var height = window.innerHeight;
+        renderer.setSize(width, height);
+        camera.aspect = width / height;
+        camera.updateProjectionMatrix();
+        renderer.render(scene, camera);
+      };
+      const clearScene = () => {
+        for (let i = scene.children.length - 1; i >= 0; i--) {
+          if (scene.children[i].type == "Mesh") scene.remove(scene.children[i]);
+        }
+      };
+
+      let subFrames = 10; // the number of subFramess the scene is divided into
+      let currentFrame = 0; // the current frame of the animation
+      let frameMatrix = []; // transformation matrix of each frame
+      const createTransformationMatrices = () => {
+        for (let i = 0; i < n * subFrames; i++) {
+          let rotation = new THREE.Matrix4();
+          let rotation2 = new THREE.Matrix4();
+          let scale = new THREE.Matrix4();
+          let translation = new THREE.Matrix4();
+          let combined = new THREE.Matrix4();
+
+          scale.makeScale(0.5, 3, 1.5); // to make a cube look like tile
+          rotation2.makeRotationZ(i * ((2 * Math.PI) / (n * subFrames))); //rotate the cube alone Z axis
+          // it makes those tiles join to itself
+          translation.makeTranslation(10, 0, 0); // translate those tile to the border of circle
+          rotation.makeRotationY(i * ((2 * Math.PI) / (n * subFrames))); // this rotate those tiles to the right on the circle
+
+          combined.multiply(rotation);
+          combined.multiply(translation);
+          combined.multiply(rotation2);
+          combined.multiply(scale);
+
+          frameMatrix[i] = combined;
+        }
+      };
+
+      const createScene = () => {
+        createTransformationMatrices();
+        // Create those cubes
+        for (let i = 0; i < n; i++) {
+          cubes[i] = new THREE.Mesh(geometry_cube, material_cube);
+        }
+        // Transform those cubes
+        for (let i = 0; i < n; i++) {
+          let index_transform = i * subFrames + currentFrame;
+          cubes[i].applyMatrix(frameMatrix[index_transform]);
+          scene.add(cubes[i]);
+        }
+      };
+
+      const handleKeyDown = event => {
+        if (event.keyCode == 49) {
+          clearScene();
+          n++;
+          createScene();
+        }
+        if (event.keyCode == 50) {
+          clearScene();
+          n--;
+          n = Math.max(n, 5);
+          createScene();
+        }
+        if (event.keyCode === 32) {
+          reverse = !reverse;
+        }
+      };
+      //link the resize of the window to the update of the camera
+      window.addEventListener("resize", MyResize);
+      window.addEventListener("keydown", handleKeyDown, false);
+    </script>
+  </body>
+</html>
