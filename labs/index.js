@@ -5,11 +5,11 @@ require("electron-reload")(__dirname, {
 });
 
 const { app, BrowserWindow, Menu } = electron;
-let mainWindow, lab02_00, lab02_01, lab03;
+let mainWindow, lab02_00, lab02_01, lab03, lab05_advanced_lighting;
 
 // process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true';
 app.on("ready", () => {
-  lab03_Window();
+  lab05_Window();
 
   const menu = Menu.buildFromTemplate(mainMenuTemplate);
   Menu.setApplicationMenu(menu);
@@ -48,6 +48,18 @@ const lab03_Window = () => {
   });
 
   lab03.loadURL(`file://${__dirname}/lab03.html`);
+};
+
+const lab05_Window = () => {
+  lab05_advanced_lighting = new BrowserWindow({
+    webPreferences: {
+      nodeIntegration: false
+    },
+    title: "Lab 03"
+  });
+  lab05_advanced_lighting.loadURL(
+    `file://${__dirname}/advanced_lighting_starting_code.html`
+  );
 };
 
 const mainWindowLoad = () => {
@@ -94,6 +106,13 @@ const mainMenuTemplate = [
       {
         role: "Lab 03",
         label: "Lab 03",
+        click() {
+          lab03_Window();
+        }
+      },
+      {
+        role: "Advanced Lighting Lab 05",
+        label: "Advanced Lighting Lab 05",
         click() {
           lab03_Window();
         }
